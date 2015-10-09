@@ -1,7 +1,7 @@
-Project Guitar Tab for Senior Design
+Project Guitar Tab Writer
 =========================================
 
-Group Name: Unresolved
+Group Name: Guitar Studio
 Group Members: Jeanne Goodman, Phillip Daniels, Marcus Kelly, and Logan Bailey.
 Description: 
 This is a three (4) part project.  
