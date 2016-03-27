@@ -1,0 +1,16 @@
+TO DO FOR Spectral analysis
+
+frequencies are
+
+Base note and, 7 notes up for major, 6 notes up for minor
+
+ex: A (110 (0 on A string), 220 (2 on G string)
+    Am (110 (0 on A string), 208 (1 on the G string)
+
+if(freq[0] == 110)
+   if(196 is in frequencies[]
+      return A minor
+    else if(220 is in frequencies[])
+      return A major
+    else
+      this must not be a chord
