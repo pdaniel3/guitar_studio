@@ -1,12 +1,8 @@
 package edu.uwyo.pdaniel3.guitarstudio;
 
-        import java.io.BufferedWriter;
-        import java.io.FileWriter;
-        import java.io.IOException;
-
 public class FrequencyDetector {
 
-    public static float[] absAndHalve(float[] in) {
+    /*public static float[] absAndHalve(float[] in) {
         // retain magnitude of in and discard half of points
         float[] result = new float[in.length / 2];
         for (int i = 0; i < in.length/2; i++) {
@@ -100,24 +96,46 @@ public class FrequencyDetector {
 
 
 
-    public static Tuple getStringName(int freq) {
+    public static Tuple getTuple(int freq) {
+
+        ArrayList<Integer> temp = new ArrayList<>();
 
         switch (freq) {
-            case 82: return new Tuple("E", "0", 82, 1);
-            case 87: return new Tuple("E", "1", 87, 1);
-            case 92: return new Tuple("E", "2", 92, 1);
+            case 82:
+                temp.add(0);
+                return new Tuple("E", temp, 82, 1);
+            case 87:
+                temp.add(1);
+                return new Tuple("E", temp, 87, 1);
+            case 92:
+                temp.add(2);
+                return new Tuple("E", "2", 92, 1);
             case 98: return new Tuple("E", "3", 98, 1);
             case 104: return new Tuple("E", "4", 104, 1);
 
             // A string
-            case 110: return new Tuple("A", "0", 110, 1);
-            case 117: return new Tuple("A", "1", 117, 1);
+            case 110:
+                temp.add(0); //low E
+                temp.add(5); // A
+                return new Tuple("A", "0", 110, 1);
+            case 117:
+220
+                return new Tuple("A", "1", 117, 1);
             case 123: return new Tuple("A", "2", 123, 1);
             case 131: return new Tuple("A", "3", 131, 1);
             case 139: return new Tuple("A", "4", 139, 1);
 
+208(
+
+            //D4-
+            //A--5
+            //E---
             // D string
-            case 147: return new Tuple("D" , "0", 147, 1);
+            case 147:
+                temp.add(0);
+                temp.add(5);
+                temp.add(10);
+                return new Tuple("D" , temp, 147, 1);
             case 156: return new Tuple("D", "1", 156, 1);
             case 165: return new Tuple("D", "2", 165, 1);
             case 175: return new Tuple("D", "3", 175, 1);
@@ -135,12 +153,21 @@ public class FrequencyDetector {
             case 277: return new Tuple("B", "2", 277, 1);
             case 294: return new Tuple("B", "3", 294, 1);
             case 311: return new Tuple("B", "4", 311, 1);
-
-            // e string
-            case 329: return new Tuple("e", "0", 329, 1);
+            case 329:
+                temp.add(0);
+                temp.add(5);
+                temp.add(9);
+                temp.add(14);
+                temp.add(19);
+                return new Tuple("e", temp, 329, 1);
             case 349: return new Tuple("e", "1", 349, 1);
             case 370: return new Tuple("e", "2", 370, 1);
-            case 392: return new Tuple("e", "3", 392, 1);
+            case 392:
+                temp.add(3);//high e
+                temp.add(8);//B
+                temp.add(12);//G
+                temp.add(17);//D
+                return new Tuple("e", temp, 392, 1);
             case 415: return new Tuple("e", "4", 415, 1);
             case 440: return new Tuple("e", "5", 440, 1);
             case 466: return new Tuple("e", "6", 466, 1);
@@ -158,8 +185,8 @@ public class FrequencyDetector {
             case 932: return new Tuple("e", "18", 932, 1);
             case 988: return new Tuple("e", "19", 988, 1);
             case 1047: return new Tuple("e", "20", 1047, 1);
-            //case 330: return "E";		<< this is interesting. did they increase the frequency by 1 on purpose? to avoid duplicates?*/
-            default: return new Tuple("e", "?", -1, 1);
+            //case 330: return "E";		<< this is interesting. did they increase the frequency by 1 on purpose? to avoid duplicates?
+            default: return new Tuple("?", "?", -1, 1);
         }
     }
 
@@ -201,6 +228,6 @@ public class FrequencyDetector {
             e.printStackTrace();
 
         }
-    }
+    }*/
 
 }
