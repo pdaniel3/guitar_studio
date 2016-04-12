@@ -1,4 +1,4 @@
-package test;
+
 
 import java.util.ArrayList;
 
@@ -12,6 +12,7 @@ public class Tuple {
 	static Integer last_fret = 0;
 	private int iteration = 0;
 	private boolean is_chord = false;
+	static int b_num_notes = 0;
 
 	// constructor: a pair of note names 0
 	// and its corresponding tab number
@@ -195,7 +196,7 @@ public class Tuple {
 		}
 
 		String checkedString = num_to_string(iteration);
-		System.out.println("Checked String is: " + checkedString);
+		//System.out.println("Checked String is: " + checkedString);
 		return noteF;
 	}
 	// return note frequency in tuple
@@ -210,9 +211,10 @@ public class Tuple {
 	}
 
 	// return the spacing in dashes
+	
 	public String get_note_dashes() {
 		String dashes = "-";
-		for (int i = 0; i < note_spacing; i++) {
+		for (int i = 0; i < note_spacing-1; i++) {
 			dashes = dashes + "-";
 		}
 		return dashes;
@@ -265,10 +267,21 @@ public class Tuple {
 
 	// prints just the note spacing as a string of dashes
 	public void print_asString_note_spacing() {
-		String dashes = "";
+		String dashes = "-";
 		for (int i = 0; i < note_spacing; i++) {
 			dashes = dashes + "-";
 		}
 		System.out.println(dashes);
 	}
+	/*
+	public int get_num_notes(Tuple tuple) {
+	int number = 0;
+	
+	if(tuple.get_note_name().charAt(0) == 'B'){
+		number ++;
+	}
+		
+		return number;
+	}
+	*/
 }
