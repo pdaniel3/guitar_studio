@@ -48,23 +48,60 @@ public class GuitarMain {
 		freqArray3.add(2);
 		
 		//Tuple note = new Tuple("e", freqArray1, 102.3, 7, false);
-		Tuple note1 = new Tuple("e", freqArray1, 130.7, 1, false);
-		Tuple note2 = new Tuple("e", freqArray, 104.75, 1, false);
-		Tuple note3 = new Tuple("E", freqArray2, 104.75, 2, false);
-		Tuple note4 = new Tuple("Bm", freqArray, 100.75, 4, true);
-		Tuple note5 = new Tuple("e", freqArray, 102.3, 7, false);
-		Tuple note6 = new Tuple("F", freqArray1, 102.3, 3, true);
-	/*
-		Tuple note4 = new Tuple("E", freqArray, 104.75, 3);
-		Tuple note5 = new Tuple("E", freqArray, 104.75, 2);
-		Tuple note6 = new Tuple("A", freqArray1, 104.75, 8);
-		Tuple note7 = new Tuple("D", freqArray1, 104.75, 4);
-		Tuple note8 = new Tuple("G", freqArray1, 104.75, 0);
-		Tuple note9 = new Tuple("G", freqArray1, 104.75, 23);
-		*/
+		//ideal example
+		
+		Tuple note13 = new Tuple("e", freqArray1, 130.7, 1, false);
+		Tuple note14 = new Tuple("e", freqArray, 104.75, 1, false);
+		Tuple note15 = new Tuple("E", freqArray2, 104.75, 2, false);
+		Tuple note16 = new Tuple("Bm", freqArray, 100.75, 4, true);
+		Tuple note17 = new Tuple("e", freqArray, 102.3, 7, false);
+		Tuple note18 = new Tuple("F", freqArray1, 102.3, 3, true);
+		
+		
+		//bunch of 10's
+		
+		Tuple note7 = new Tuple("E", freqArray2, 130.7, 1, false);
+		Tuple note8 = new Tuple("E", freqArray1, 104.75, 1, false);
+		Tuple note9 = new Tuple("E", freqArray2, 104.75, 2, false);
+		Tuple note10 = new Tuple("A", freqArray1, 100.75, 4, false);
+		Tuple note11 = new Tuple("E", freqArray2, 102.3, 8, false);
+		Tuple note12 = new Tuple("A", freqArray2, 102.3, 4, false);
+		Tuple note19 = new Tuple("C ", freqArray2, 102.3, 2, true);
+
+		//wont break if total characters is 32 or less
+		
+		//bunch of chords
+		Tuple note1 = new Tuple("E ", freqArray2, 130.7, 1, true);
+		Tuple note2 = new Tuple("Em", freqArray2, 104.75, 1, true);
+		Tuple note3 = new Tuple("D ", freqArray2, 104.75, 2, true);
+		Tuple note4 = new Tuple("N ", freqArray2, 100.75, 4, true);
+		Tuple note5 = new Tuple("Bm", freqArray2, 102.3, 8, true);
+		Tuple note6 = new Tuple("B ", freqArray2, 102.3, 4, true);
 		
 		//initialize the tuple array
 		Tuple[] tupleArray = new Tuple[6];
+		
+		//10's array
+		Tuple[] tupleArray2  = new Tuple[7];
+		
+		Tuple[] tupleArray3  = new Tuple[6];
+		
+		tupleArray3[0] = note13;
+		tupleArray3[1] = note14;
+		tupleArray3[2] = note15;
+		tupleArray3[3] = note16;
+		tupleArray3[4] = note17;
+		tupleArray3[5] = note18;
+		
+		tupleArray2[0] = note7;
+		tupleArray2[1] = note8;
+		tupleArray2[2] = note9;
+		tupleArray2[3] = note10;
+		tupleArray2[4] = note11;
+		tupleArray2[5] = note12;
+		tupleArray2[6] = note19;
+
+		
 		//tupleArray[0] = note;
 		tupleArray[0] = note1;
 		tupleArray[1] = note2;
@@ -91,6 +128,12 @@ public class GuitarMain {
 		//System.out.print("\n");
 		runSection(tupleArray1);
 		printSection(tupleArray1);
+		
+		runSection(tupleArray2);
+		printSection(tupleArray2);
+		
+		runSection(tupleArray3);
+		printSection(tupleArray3);
 		
 	}
 
@@ -207,71 +250,152 @@ public class GuitarMain {
 				printChord(i);
 			}
 			else if(i.get_note_name().charAt(0) == 'e'){
-				e_note_played = true;
-				estring = estring + i.get_note_dashes()
-				+ i.get_fret_number().toString();
-				Bstring = Bstring + i.get_note_dashes();
-				Gstring = Gstring + i.get_note_dashes();
-				Dstring = Dstring + i.get_note_dashes();
-				Astring = Astring + i.get_note_dashes();
-				Estring = Estring +  i.get_note_dashes();
-				ChrdString = ChrdString +  i.get_note_dashes();
+				if(i.get_fret_number().toString().length() > 1){
+					
+					estring = estring + i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring +  i.get_note_dashes() + "-";
+					Gstring = Gstring + i.get_note_dashes() + "-";
+					Dstring = Dstring + i.get_note_dashes() + "-";
+					Astring = Astring + i.get_note_dashes() + "-";
+					Estring = Estring + i.get_note_dashes() + "-";
+					ChrdString = ChrdString + i.get_note_dashes() + "-";
+				}
+				else{
+					
+					estring = estring + i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring + i.get_note_dashes();
+					Gstring = Gstring + i.get_note_dashes();
+					Dstring = Dstring + i.get_note_dashes();
+					Astring = Astring + i.get_note_dashes();
+					Estring = Estring +  i.get_note_dashes();
+					ChrdString = ChrdString +  i.get_note_dashes();
+				}
 			}
 			else if(i.get_note_name().charAt(0) == 'B'){
-				B_note_played = true;
-				Bstring = Bstring +  i.get_note_dashes()
-				+ i.get_fret_number().toString();
-				estring = estring +  i.get_note_dashes();
-				Gstring = Gstring + i.get_note_dashes();
-				Dstring = Dstring +  i.get_note_dashes();
-				Astring = Astring + i.get_note_dashes();
-				Estring = Estring +  i.get_note_dashes();
-				ChrdString = ChrdString + i.get_note_dashes();
+				if(i.get_fret_number().toString().length() > 1){
+					
+					Bstring = Bstring + i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Estring = Estring +  i.get_note_dashes() + "-";
+					Gstring = Gstring + i.get_note_dashes() + "-";
+					Dstring = Dstring + i.get_note_dashes() + "-";
+					Astring = Astring + i.get_note_dashes() + "-";
+					estring = estring + i.get_note_dashes() + "-";
+					ChrdString = ChrdString + i.get_note_dashes() + "-";
+				}
+				else{
+					
+					Bstring = Bstring +  i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					estring = estring +  i.get_note_dashes();
+					Gstring = Gstring + i.get_note_dashes();
+					Dstring = Dstring +  i.get_note_dashes();
+					Astring = Astring + i.get_note_dashes();
+					Estring = Estring +  i.get_note_dashes();
+					ChrdString = ChrdString + i.get_note_dashes();
+				}
 				
 			}
 			else if(i.get_note_name().charAt(0) == 'G'){
-				G_note_played = true;
-				Gstring = Gstring +  i.get_note_dashes()
-				+ i.get_fret_number().toString();
-				Bstring = Bstring + i.get_note_dashes();
-				estring = estring +  i.get_note_dashes();
-				Dstring = Dstring +  i.get_note_dashes();
-				Astring = Astring + i.get_note_dashes();
-				Estring = Estring + i.get_note_dashes();
-				ChrdString = ChrdString + i.get_note_dashes();
+				if(i.get_fret_number().toString().length() > 1){
+					
+					Gstring = Gstring + i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring +  i.get_note_dashes() + "-";
+					Estring = Estring + i.get_note_dashes() + "-";
+					Dstring = Dstring + i.get_note_dashes() + "-";
+					Astring = Astring + i.get_note_dashes() + "-";
+					estring = estring + i.get_note_dashes() + "-";
+					ChrdString = ChrdString + i.get_note_dashes() + "-";
+				}
+				else{
+					
+					Gstring = Gstring +  i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring + i.get_note_dashes();
+					estring = estring +  i.get_note_dashes();
+					Dstring = Dstring +  i.get_note_dashes();
+					Astring = Astring + i.get_note_dashes();
+					Estring = Estring + i.get_note_dashes();
+					ChrdString = ChrdString + i.get_note_dashes();
+				}
 			}
 			else if(i.get_note_name().charAt(0) == 'D'){
-				D_note_played = true;
-				Dstring = Dstring +  i.get_note_dashes()
-				+ i.get_fret_number().toString();
-				Bstring = Bstring +  i.get_note_dashes();
-				Gstring = Gstring +  i.get_note_dashes();
-				estring = estring +  i.get_note_dashes();
-				Astring = Astring +  i.get_note_dashes();
-				Estring = Estring +  i.get_note_dashes();
-				ChrdString = ChrdString + i.get_note_dashes();
+				
+				if(i.get_fret_number().toString().length() > 1){
+					
+					Dstring = Dstring + i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring +  i.get_note_dashes() + "-";
+					Gstring = Gstring + i.get_note_dashes() + "-";
+					Estring = Estring + i.get_note_dashes() + "-";
+					Astring = Astring + i.get_note_dashes() + "-";
+					estring = estring + i.get_note_dashes() + "-";
+					ChrdString = ChrdString + i.get_note_dashes() + "-";
+				}
+				else{
+					Dstring = Dstring +  i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring +  i.get_note_dashes();
+					Gstring = Gstring +  i.get_note_dashes();
+					estring = estring +  i.get_note_dashes();
+					Astring = Astring +  i.get_note_dashes();
+					Estring = Estring +  i.get_note_dashes();
+					ChrdString = ChrdString + i.get_note_dashes();
+				}
 			}
 			else if(i.get_note_name().charAt(0) == 'A'){
-				A_note_played = true;
-				Astring = Astring +  i.get_note_dashes()
-				+ i.get_fret_number().toString();
-				Bstring = Bstring + i.get_note_dashes();
-				Gstring = Gstring + i.get_note_dashes();
-				Dstring = Dstring +  i.get_note_dashes();
-				estring = estring + i.get_note_dashes();
-				Estring = Estring +  i.get_note_dashes();
-				ChrdString = ChrdString + i.get_note_dashes();
+				if(i.get_fret_number().toString().length() > 1){
+					E_note_played = true;
+					Astring = Astring + i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring +  i.get_note_dashes() + "-";
+					Gstring = Gstring + i.get_note_dashes() + "-";
+					Dstring = Dstring + i.get_note_dashes() + "-";
+					Estring = Estring + i.get_note_dashes() + "-";
+					estring = estring + i.get_note_dashes() + "-";
+					ChrdString = ChrdString + i.get_note_dashes() + "-";
+				}
+				else{
+					A_note_played = true;
+					Astring = Astring +  i.get_note_dashes()
+					+ i.get_fret_number().toString();
+					Bstring = Bstring + i.get_note_dashes();
+					Gstring = Gstring + i.get_note_dashes();
+					Dstring = Dstring +  i.get_note_dashes();
+					estring = estring + i.get_note_dashes();
+					Estring = Estring +  i.get_note_dashes();
+					ChrdString = ChrdString + i.get_note_dashes();
+				}
 			}
 			else if(i.get_note_name().charAt(0) == 'E'){
-				E_note_played = true;
-				Estring = Estring + i.get_note_dashes()
-				+ i.get_fret_number().toString();
-				Bstring = Bstring +  i.get_note_dashes();
-				Gstring = Gstring + i.get_note_dashes();
-				Dstring = Dstring + i.get_note_dashes();
-				Astring = Astring + i.get_note_dashes();
-				estring = estring + i.get_note_dashes();
-				ChrdString = ChrdString + i.get_note_dashes();
+				
+					if(i.get_fret_number().toString().length() > 1){
+						E_note_played = true;
+						Estring = Estring + i.get_note_dashes()
+						+ i.get_fret_number().toString();
+						Bstring = Bstring +  i.get_note_dashes() + "-";
+						Gstring = Gstring + i.get_note_dashes() + "-";
+						Dstring = Dstring + i.get_note_dashes() + "-";
+						Astring = Astring + i.get_note_dashes() + "-";
+						estring = estring + i.get_note_dashes() + "-";
+						ChrdString = ChrdString + i.get_note_dashes() + "-";
+					}
+					else{
+						
+						E_note_played = true;
+						Estring = Estring + i.get_note_dashes()
+						+ i.get_fret_number().toString();
+						Bstring = Bstring +  i.get_note_dashes();
+						Gstring = Gstring + i.get_note_dashes();
+						Dstring = Dstring + i.get_note_dashes();
+						Astring = Astring + i.get_note_dashes();
+						estring = estring + i.get_note_dashes();
+						ChrdString = ChrdString + i.get_note_dashes();
+					}
+					
 			}
 			
 			
@@ -330,7 +454,7 @@ public class GuitarMain {
 		System.out.println("   D|" + Dstring + restOf_D_dashes + "|");
 		System.out.println("   A|" + Astring + restOf_A_dashes + "|");
 		System.out.println("   E|" + Estring + restOf_E_dashes + "|");
-		System.out.println("Chrd:" + ChrdString + restOf_Chrd_dashes + "|");
+		System.out.println("Chrd|" + ChrdString + restOf_Chrd_dashes + "|");
 		System.out.print("\n");
 		
 		
@@ -411,17 +535,17 @@ public class GuitarMain {
 				if(i.get_note_name().charAt(0) == 'E'){
 					if(i.get_note_name().charAt(1) == 'm'){
 						Estring = Estring + i.get_note_dashes()
-						+ "0";
+						+ "0" + "-";
 						Astring = Astring +  i.get_note_dashes()
-						+ "2";
+						+ "2" + "-";
 						Dstring = Dstring +  i.get_note_dashes()
-						+ "2";
+						+ "2" + "-";
 						Gstring = Gstring + i.get_note_dashes()
-						+ "0";
+						+ "0" + "-";
 						Bstring = Bstring + i.get_note_dashes()
-						+ "0";
+						+ "0" + "-";
 						estring = estring + i.get_note_dashes()
-						+ "0";
+						+ "0" + "-";
 						ChrdString = ChrdString +  i.get_note_dashes()+ "Em";
 					}
 					else{
@@ -568,83 +692,25 @@ public class GuitarMain {
 					+ "0";
 					ChrdString = ChrdString + i.get_note_dashes()+ "F";
 				}
-			
+				else if(i.get_note_name().charAt(0) == 'N'){
+					Estring = Estring +  i.get_note_dashes()
+					+ "-";
+					Astring = Astring + i.get_note_dashes()
+					+ "-";
+					Dstring = Dstring + i.get_note_dashes()
+					+ "-";
+					Gstring = Gstring + i.get_note_dashes()
+					+ "-";
+					Bstring = Bstring +  i.get_note_dashes()
+					+ "-";
+					estring = estring +  i.get_note_dashes()
+					+ "-";
+					ChrdString = ChrdString + i.get_note_dashes()+ "-";
+				}
 		
 	}
 	
-	/*
-	public static String get_note_dashes(Tuple tuple) {
-		String dashes = "-";
-		//find how many notes are on the string
-		
-		int num_notes = 0;
-		
-		if(e_note_played == true)
-		{
-			num_notes = tuple.get_note_spacing() - tuple.get_num_notes(tuple);
-			//System.out.println("Num_notes is: " + num_notes);
-			for (int i = 0; i < num_notes; i++) {
-				dashes = dashes + "-";
-			}
-			//note_played = false;
-		}
-		else if(B_note_played == true)
-		{
-			num_notes = tuple.get_note_spacing() - tuple.get_num_notes(tuple);
-			//System.out.println("Num_notes is: " + num_notes);
-			for (int i = 0; i < num_notes; i++) {
-				dashes = dashes + "-";
-			}
-			//note_played = false;
-		}
-		else if(G_note_played == true)
-		{
-			num_notes = tuple.get_note_spacing() - tuple.get_num_notes(tuple);
-			//System.out.println("Num_notes is: " + num_notes);
-			for (int i = 0; i < num_notes; i++) {
-				dashes = dashes + "-";
-			}
-			//note_played = false;
-		}
-		else if(D_note_played == true)
-		{
-			num_notes = tuple.get_note_spacing() - tuple.get_num_notes(tuple);
-			//System.out.println("Num_notes is: " + num_notes);
-			for (int i = 0; i < num_notes; i++) {
-				dashes = dashes + "-";
-			}
-			//note_played = false;
-		}
-		else if(A_note_played == true)
-		{
-			num_notes = tuple.get_note_spacing() - tuple.get_num_notes(tuple);
-			//System.out.println("Num_notes is: " + num_notes);
-			for (int i = 0; i < num_notes; i++) {
-				dashes = dashes + "-";
-			}
-			//note_played = false;
-		}
-		else if(E_note_played == true)
-		{
-			num_notes = tuple.get_note_spacing() - tuple.get_num_notes(tuple);
-			//System.out.println("Num_notes is: " + num_notes);
-			for (int i = 0; i < num_notes; i++) {
-				dashes = dashes + "-";
-			}
-			//note_played = false;
-		}
-		
-		else
-		{
-			for (int i = 0; i < tuple.get_note_spacing()-101; i++) {
-				dashes = dashes + "-";
-			}
-		}
-		
-			
-		return dashes;
-	}
-	*/
+
 }
 
 
