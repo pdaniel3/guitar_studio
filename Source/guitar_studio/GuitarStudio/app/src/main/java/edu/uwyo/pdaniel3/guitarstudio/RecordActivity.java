@@ -1,11 +1,27 @@
 package edu.uwyo.pdaniel3.guitarstudio;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import be.tarsos.dsp.AudioDispatcher;
@@ -17,8 +33,9 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 
-public class MainActivity extends AppCompatActivity {
+public class RecordActivity extends Activity {
 
+    Context context = this;
 
     static String estring = "";
     static String Bstring = "";
@@ -34,34 +51,103 @@ public class MainActivity extends AppCompatActivity {
     static boolean A_note_played = false;
     static boolean E_note_played = false;
 
+    private Thread listener;
+
     private Tuple current_tuple;
 
     private String song = "";
 
-    private static final String TAG = "Activity";
+    private static final String TAG = "HomeScreenActivity";
     TextView tablature;
-    Button mDone;
+    Button mRecord, mSave, mClear;
+
+    private boolean recording = false;
 
     ArrayList<Tuple> section = new ArrayList<Tuple>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_record);
 
-        tablature = (TextView) findViewById(R.id.tablature);
+        tablature = (TextView) findViewById(R.id.recorded_tab);
         //tablature.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/cour.ttf"));
 
-        mDone = (Button) findViewById(R.id.button);
 
-        mDone.setOnClickListener(new View.OnClickListener() {
+        mClear = (Button) findViewById(R.id.clear);
+        mClear.setEnabled(false);
+        mClear.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //normalize_strings();
+                song = "";
                 tablature.setText(song);
+                mSave.setEnabled(false);
+                mClear.setEnabled(false);
+                mRecord.setEnabled(true);
             }
         });
 
-        listen();
+        mSave = (Button) findViewById(R.id.save);
+        mSave.setEnabled(false);
+        mSave.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                // get prompts.xml view
+                LayoutInflater li = LayoutInflater.from(context);
+                View promptsView = li.inflate(R.layout.save_dialog, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        context);
+                alertDialogBuilder.setView(promptsView);
+
+                final EditText userInput = (EditText) promptsView
+                        .findViewById(R.id.editTextDialogUserInput);
+
+
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        try {
+                                            saveSong(userInput.getText().toString());
+                                            mClear.performClick();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
+        });
+
+
+        mRecord = (Button) findViewById(R.id.record);
+        mRecord.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (recording) {
+                    recording = false;
+                    listener.interrupt();
+                    mRecord.setText("Record");
+                    mSave.setEnabled(true);
+                    mClear.setEnabled(true);
+                    mRecord.setEnabled(false);
+                    tablature.setText(song);
+                } else {
+                    recording = true;
+                    mRecord.setText("Done");
+                    listen();
+                }
+
+            }
+        });
     }
 
     @Override
@@ -74,17 +160,32 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
+    public void saveSong(String songName) throws IOException {
+        String fileName = songName + ".txt";
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File (sdCard.getAbsolutePath() + "/recordings");
+        dir.mkdirs();
+        File file = new File(dir, fileName);
+
+
+        FileOutputStream stream = new FileOutputStream(file);
+        try {
+            stream.write(song.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            stream.close();
+        }
+    }
+
     public void shouldPrint(Tuple currentNote) {
-      ArrayList<Tuple> tempSection = section;
-      tempSection.add(currentNote);
-      Tuple[] s = tempSection.toArray(new Tuple[section.size()]);
-      String mockPrint = printSection(s);
-      if(((double)((mockPrint.length() - 7)) / 6) > 35) {
-            song = song + mockPrint;
+        if (section.size() >= 14) {
+            song = song + printSection(section.toArray(new Tuple[section.size()]))+"\n\n";
             section.clear();
-      } else {
-          section.add(currentNote);
-      }
+        } else {
+            section.add(currentNote);
+        }
     }
 
     public void listen() {
@@ -92,14 +193,14 @@ public class MainActivity extends AppCompatActivity {
 
         PitchDetectionHandler pdh = new PitchDetectionHandler() {
             @Override
-            public void handlePitch(PitchDetectionResult result,AudioEvent event) {
+            public void handlePitch(PitchDetectionResult result, AudioEvent event) {
 
                 final float pitchInHz = result.getPitch();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         TextView text = (TextView) findViewById(R.id.textView1);
-                        if(pitchInHz > 0){
+                        if (pitchInHz > 0 && recording) {
                             text.setText("" + pitchInHz);
                             current_tuple = FrequencyDetector.detectStringFreq((double) pitchInHz);
                             shouldPrint(current_tuple);
@@ -112,10 +213,11 @@ public class MainActivity extends AppCompatActivity {
         };
         AudioProcessor p = new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, pdh);
         dispatcher.addAudioProcessor(p);
-        new Thread(dispatcher,"Audio Dispatcher").start();
+        listener = new Thread(dispatcher, "Audio Dispatcher");
+        listener.start();
     }
 
-    public String printSection(Tuple[] section){
+    public static String printSection(Tuple[] section){
 
         Tuple[] tupleArray = section;
 
@@ -227,71 +329,152 @@ public class MainActivity extends AppCompatActivity {
                 printChord(i);
             }
             else if(i.get_note_name().charAt(0) == 'e'){
-                e_note_played = true;
-                estring = estring + i.get_note_dashes()
-                        + i.get_fret_number().toString();
-                Bstring = Bstring + i.get_note_dashes();
-                Gstring = Gstring + i.get_note_dashes();
-                Dstring = Dstring + i.get_note_dashes();
-                Astring = Astring + i.get_note_dashes();
-                Estring = Estring +  i.get_note_dashes();
-                ChrdString = ChrdString +  i.get_note_dashes();
+                if(i.get_fret_number().toString().length() > 1){
+
+                    estring = estring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes() + "-";
+                    Gstring = Gstring + i.get_note_dashes() + "-";
+                    Dstring = Dstring + i.get_note_dashes() + "-";
+                    Astring = Astring + i.get_note_dashes() + "-";
+                    Estring = Estring + i.get_note_dashes() + "-";
+                    ChrdString = ChrdString + i.get_note_dashes() + "-";
+                }
+                else{
+
+                    estring = estring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring + i.get_note_dashes();
+                    Gstring = Gstring + i.get_note_dashes();
+                    Dstring = Dstring + i.get_note_dashes();
+                    Astring = Astring + i.get_note_dashes();
+                    Estring = Estring +  i.get_note_dashes();
+                    ChrdString = ChrdString +  i.get_note_dashes();
+                }
             }
             else if(i.get_note_name().charAt(0) == 'B'){
-                B_note_played = true;
-                Bstring = Bstring +  i.get_note_dashes()
-                        + i.get_fret_number().toString();
-                estring = estring +  i.get_note_dashes();
-                Gstring = Gstring + i.get_note_dashes();
-                Dstring = Dstring +  i.get_note_dashes();
-                Astring = Astring + i.get_note_dashes();
-                Estring = Estring +  i.get_note_dashes();
-                ChrdString = ChrdString + i.get_note_dashes();
+                if(i.get_fret_number().toString().length() > 1){
+
+                    Bstring = Bstring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Estring = Estring +  i.get_note_dashes() + "-";
+                    Gstring = Gstring + i.get_note_dashes() + "-";
+                    Dstring = Dstring + i.get_note_dashes() + "-";
+                    Astring = Astring + i.get_note_dashes() + "-";
+                    estring = estring + i.get_note_dashes() + "-";
+                    ChrdString = ChrdString + i.get_note_dashes() + "-";
+                }
+                else{
+
+                    Bstring = Bstring +  i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    estring = estring +  i.get_note_dashes();
+                    Gstring = Gstring + i.get_note_dashes();
+                    Dstring = Dstring +  i.get_note_dashes();
+                    Astring = Astring + i.get_note_dashes();
+                    Estring = Estring +  i.get_note_dashes();
+                    ChrdString = ChrdString + i.get_note_dashes();
+                }
 
             }
             else if(i.get_note_name().charAt(0) == 'G'){
-                G_note_played = true;
-                Gstring = Gstring +  i.get_note_dashes()
-                        + i.get_fret_number().toString();
-                Bstring = Bstring + i.get_note_dashes();
-                estring = estring +  i.get_note_dashes();
-                Dstring = Dstring +  i.get_note_dashes();
-                Astring = Astring + i.get_note_dashes();
-                Estring = Estring + i.get_note_dashes();
-                ChrdString = ChrdString + i.get_note_dashes();
+                if(i.get_fret_number().toString().length() > 1){
+
+                    Gstring = Gstring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes() + "-";
+                    Estring = Estring + i.get_note_dashes() + "-";
+                    Dstring = Dstring + i.get_note_dashes() + "-";
+                    Astring = Astring + i.get_note_dashes() + "-";
+                    estring = estring + i.get_note_dashes() + "-";
+                    ChrdString = ChrdString + i.get_note_dashes() + "-";
+                }
+                else{
+
+                    Gstring = Gstring +  i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring + i.get_note_dashes();
+                    estring = estring +  i.get_note_dashes();
+                    Dstring = Dstring +  i.get_note_dashes();
+                    Astring = Astring + i.get_note_dashes();
+                    Estring = Estring + i.get_note_dashes();
+                    ChrdString = ChrdString + i.get_note_dashes();
+                }
             }
             else if(i.get_note_name().charAt(0) == 'D'){
-                D_note_played = true;
-                Dstring = Dstring +  i.get_note_dashes()
-                        + i.get_fret_number().toString();
-                Bstring = Bstring +  i.get_note_dashes();
-                Gstring = Gstring +  i.get_note_dashes();
-                estring = estring +  i.get_note_dashes();
-                Astring = Astring +  i.get_note_dashes();
-                Estring = Estring +  i.get_note_dashes();
-                ChrdString = ChrdString + i.get_note_dashes();
+
+                if(i.get_fret_number().toString().length() > 1){
+
+                    Dstring = Dstring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes() + "-";
+                    Gstring = Gstring + i.get_note_dashes() + "-";
+                    Estring = Estring + i.get_note_dashes() + "-";
+                    Astring = Astring + i.get_note_dashes() + "-";
+                    estring = estring + i.get_note_dashes() + "-";
+                    ChrdString = ChrdString + i.get_note_dashes() + "-";
+                }
+                else{
+                    Dstring = Dstring +  i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes();
+                    Gstring = Gstring +  i.get_note_dashes();
+                    estring = estring +  i.get_note_dashes();
+                    Astring = Astring +  i.get_note_dashes();
+                    Estring = Estring +  i.get_note_dashes();
+                    ChrdString = ChrdString + i.get_note_dashes();
+                }
             }
             else if(i.get_note_name().charAt(0) == 'A'){
-                A_note_played = true;
-                Astring = Astring +  i.get_note_dashes()
-                        + i.get_fret_number().toString();
-                Bstring = Bstring + i.get_note_dashes();
-                Gstring = Gstring + i.get_note_dashes();
-                Dstring = Dstring +  i.get_note_dashes();
-                estring = estring + i.get_note_dashes();
-                Estring = Estring +  i.get_note_dashes();
-                ChrdString = ChrdString + i.get_note_dashes();
+                if(i.get_fret_number().toString().length() > 1){
+                    E_note_played = true;
+                    Astring = Astring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes() + "-";
+                    Gstring = Gstring + i.get_note_dashes() + "-";
+                    Dstring = Dstring + i.get_note_dashes() + "-";
+                    Estring = Estring + i.get_note_dashes() + "-";
+                    estring = estring + i.get_note_dashes() + "-";
+                    ChrdString = ChrdString + i.get_note_dashes() + "-";
+                }
+                else{
+                    A_note_played = true;
+                    Astring = Astring +  i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring + i.get_note_dashes();
+                    Gstring = Gstring + i.get_note_dashes();
+                    Dstring = Dstring +  i.get_note_dashes();
+                    estring = estring + i.get_note_dashes();
+                    Estring = Estring +  i.get_note_dashes();
+                    ChrdString = ChrdString + i.get_note_dashes();
+                }
             }
             else if(i.get_note_name().charAt(0) == 'E'){
-                E_note_played = true;
-                Estring = Estring + i.get_note_dashes()
-                        + i.get_fret_number().toString();
-                Bstring = Bstring +  i.get_note_dashes();
-                Gstring = Gstring + i.get_note_dashes();
-                Dstring = Dstring + i.get_note_dashes();
-                Astring = Astring + i.get_note_dashes();
-                estring = estring + i.get_note_dashes();
-                ChrdString = ChrdString + i.get_note_dashes();
+
+                if(i.get_fret_number().toString().length() > 1){
+                    E_note_played = true;
+                    Estring = Estring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes() + "-";
+                    Gstring = Gstring + i.get_note_dashes() + "-";
+                    Dstring = Dstring + i.get_note_dashes() + "-";
+                    Astring = Astring + i.get_note_dashes() + "-";
+                    estring = estring + i.get_note_dashes() + "-";
+                    ChrdString = ChrdString + i.get_note_dashes() + "-";
+                }
+                else{
+
+                    E_note_played = true;
+                    Estring = Estring + i.get_note_dashes()
+                            + i.get_fret_number().toString();
+                    Bstring = Bstring +  i.get_note_dashes();
+                    Gstring = Gstring + i.get_note_dashes();
+                    Dstring = Dstring + i.get_note_dashes();
+                    Astring = Astring + i.get_note_dashes();
+                    estring = estring + i.get_note_dashes();
+                    ChrdString = ChrdString + i.get_note_dashes();
+                }
+
             }
 
 
@@ -350,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("   D|" + Dstring + restOf_D_dashes + "|");
         System.out.println("   A|" + Astring + restOf_A_dashes + "|");
         System.out.println("   E|" + Estring + restOf_E_dashes + "|");
-        System.out.println("Chrd:" + ChrdString + restOf_Chrd_dashes + "|");
+        System.out.println("Chrd|" + ChrdString + restOf_Chrd_dashes + "|");
         System.out.print("\n");
 
 
@@ -359,7 +542,7 @@ public class MainActivity extends AppCompatActivity {
                 "G|" + Gstring + restOf_G_dashes + "|\n" +
                 "D|" + Dstring + restOf_D_dashes + "|\n" +
                 "A|" + Astring + restOf_A_dashes + "|\n" +
-                "E|" + Estring + restOf_E_dashes + "|\n\n");
+                "E|" + Estring + restOf_E_dashes + "|\n");
 
         estring = "";
         Bstring = "";
@@ -381,17 +564,17 @@ public class MainActivity extends AppCompatActivity {
         if(i.get_note_name().charAt(0) == 'E'){
             if(i.get_note_name().charAt(1) == 'm'){
                 Estring = Estring + i.get_note_dashes()
-                        + "0";
+                        + "0" + "-";
                 Astring = Astring +  i.get_note_dashes()
-                        + "2";
+                        + "2" + "-";
                 Dstring = Dstring +  i.get_note_dashes()
-                        + "2";
+                        + "2" + "-";
                 Gstring = Gstring + i.get_note_dashes()
-                        + "0";
+                        + "0" + "-";
                 Bstring = Bstring + i.get_note_dashes()
-                        + "0";
+                        + "0" + "-";
                 estring = estring + i.get_note_dashes()
-                        + "0";
+                        + "0" + "-";
                 ChrdString = ChrdString +  i.get_note_dashes()+ "Em";
             }
             else{
@@ -538,5 +721,21 @@ public class MainActivity extends AppCompatActivity {
                     + "0";
             ChrdString = ChrdString + i.get_note_dashes()+ "F";
         }
+        else if(i.get_note_name().charAt(0) == 'N'){
+            Estring = Estring +  i.get_note_dashes()
+                    + "-";
+            Astring = Astring + i.get_note_dashes()
+                    + "-";
+            Dstring = Dstring + i.get_note_dashes()
+                    + "-";
+            Gstring = Gstring + i.get_note_dashes()
+                    + "-";
+            Bstring = Bstring +  i.get_note_dashes()
+                    + "-";
+            estring = estring +  i.get_note_dashes()
+                    + "-";
+            ChrdString = ChrdString + i.get_note_dashes()+ "-";
+        }
+
     }
 }

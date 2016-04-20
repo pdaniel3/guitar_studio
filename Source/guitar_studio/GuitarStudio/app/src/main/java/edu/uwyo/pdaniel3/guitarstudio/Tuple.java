@@ -1,5 +1,7 @@
 package edu.uwyo.pdaniel3.guitarstudio;
 
+
+
 import java.util.ArrayList;
 
 public class Tuple {
@@ -12,7 +14,7 @@ public class Tuple {
     static Integer last_fret = 0;
     private int iteration = 0;
     private boolean is_chord = false;
-    static int b_num_notes = 0;
+
 
     // constructor: a pair of note names 0
     // and its corresponding tab number
@@ -273,4 +275,15 @@ public class Tuple {
         }
         System.out.println(dashes);
     }
+	/*
+	public int get_num_notes(Tuple tuple) {
+	int number = 0;
+
+	if(tuple.get_note_name().charAt(0) == 'B'){
+		number ++;
+	}
+
+		return number;
+	}
+	*/
 }
