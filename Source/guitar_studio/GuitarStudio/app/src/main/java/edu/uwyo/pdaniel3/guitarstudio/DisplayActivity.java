@@ -4,14 +4,18 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -19,15 +23,77 @@ public class DisplayActivity extends Activity {
 
     private Context context = this;
 
-    private Button mLoad, mDelete;
-    private TextView tablature;
+    private Button mLoad, mDelete, mSave, mEdit;
+    private EditText tablature;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display);
 
-        tablature = (TextView) findViewById(R.id.tablature);
+        tablature = (EditText) findViewById(R.id.tablature);
+        tablature.setEnabled(false);
+        tablature.setTypeface(Typeface.createFromAsset(getAssets(), "COURIER.TTF"));
+
+        mEdit = (Button) findViewById(R.id.edit);
+        mEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!(mEdit.getText().toString().equals("Done"))) {
+                    mEdit.setText("Done");
+                    tablature.setEnabled(true);
+                    mSave.setEnabled(false);
+                    mDelete.setEnabled(false);
+                    mLoad.setEnabled(false);
+                } else {
+                    mEdit.setText("Edit");
+                    tablature.setEnabled(false);
+                    mSave.setEnabled(true);
+                    mDelete.setEnabled(true);
+                    mLoad.setEnabled(true);
+                }
+
+            }
+        });
+
+        mSave = (Button) findViewById(R.id.displaysave);
+        mSave.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                // get prompts.xml view
+                LayoutInflater li = LayoutInflater.from(context);
+                View promptsView = li.inflate(R.layout.save_dialog, null);
+
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        context);
+                alertDialogBuilder.setView(promptsView);
+
+                final EditText userInput = (EditText) promptsView
+                        .findViewById(R.id.editTextDialogUserInput);
+
+
+                alertDialogBuilder
+                        .setCancelable(false)
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        try {
+                                            saveSong(userInput.getText().toString());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                })
+                        .setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
+        });
 
         mDelete = (Button) findViewById(R.id.delete);
         mDelete.setOnClickListener(new View.OnClickListener() {
@@ -37,7 +103,7 @@ public class DisplayActivity extends Activity {
                 final File[] files = getFileNames();
                 final CharSequence[] items = new CharSequence[files.length];
                 for (int i = 0; i < files.length; i++) {
-                    items[i] = files[i].getName();
+                    items[i] = files[i].getName().replace(".txt","");
                 }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -136,5 +202,24 @@ public class DisplayActivity extends Activity {
         }
 
         return files.toArray(new File[files.size()]);
+    }
+
+    public void saveSong(String songName) throws IOException {
+        String fileName = songName + ".txt";
+
+        File sdCard = Environment.getExternalStorageDirectory();
+        File dir = new File (sdCard.getAbsolutePath() + "/recordings");
+        dir.mkdirs();
+        File file = new File(dir, fileName);
+
+
+        FileOutputStream stream = new FileOutputStream(file);
+        try {
+            stream.write(tablature.getText().toString().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            stream.close();
+        }
     }
 }

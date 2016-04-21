@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,15 +53,15 @@ public class RecordActivity extends Activity {
     static boolean A_note_played = false;
     static boolean E_note_played = false;
 
-    private Thread listener;
+    private Thread listener = new Thread();
 
     private Tuple current_tuple;
 
     private String song = "";
 
     private static final String TAG = "HomeScreenActivity";
-    TextView tablature;
-    Button mRecord, mSave, mClear;
+    private TextView tablature;
+    private Button mRecord, mSave, mClear;
 
     private boolean recording = false;
 
@@ -72,8 +74,7 @@ public class RecordActivity extends Activity {
         setContentView(R.layout.activity_record);
 
         tablature = (TextView) findViewById(R.id.recorded_tab);
-        //tablature.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/cour.ttf"));
-
+        tablature.setTypeface(Typeface.createFromAsset(getAssets(), "COURIER.TTF"));
 
         mClear = (Button) findViewById(R.id.clear);
         mClear.setEnabled(false);
@@ -138,11 +139,15 @@ public class RecordActivity extends Activity {
                     mRecord.setText("Record");
                     mSave.setEnabled(true);
                     mClear.setEnabled(true);
+                    ImageView iv = (ImageView) findViewById(R.id.imageView);
+                    iv.setVisibility(View.INVISIBLE);
                     mRecord.setEnabled(false);
                     tablature.setText(song);
+                    listener.interrupt();
                 } else {
                     recording = true;
                     mRecord.setText("Done");
+                    ((ImageView) findViewById(R.id.imageView)).setImageResource(R.drawable.reddot);
                     listen();
                 }
 
@@ -211,7 +216,7 @@ public class RecordActivity extends Activity {
                 });
             }
         };
-        AudioProcessor p = new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, pdh);
+        AudioProcessor p = new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.YIN, 22050, 1024, pdh);
         dispatcher.addAudioProcessor(p);
         listener = new Thread(dispatcher, "Audio Dispatcher");
         listener.start();
@@ -542,7 +547,8 @@ public class RecordActivity extends Activity {
                 "G|" + Gstring + restOf_G_dashes + "|\n" +
                 "D|" + Dstring + restOf_D_dashes + "|\n" +
                 "A|" + Astring + restOf_A_dashes + "|\n" +
-                "E|" + Estring + restOf_E_dashes + "|\n");
+                "E|" + Estring + restOf_E_dashes + "|\n" +
+                 "--" + ChrdString + restOf_Chrd_dashes + "|\n");
 
         estring = "";
         Bstring = "";
